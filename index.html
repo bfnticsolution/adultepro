@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lecteur vidéo professionnel avec playlist et gestion de publicités">
+    <title>XFLIX - La box des ADULTES</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="XFLIX">
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+    <meta name="theme-color" content="#9a0475" />
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#9a0475">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        :root {
+            --primary-color: #9a0475;
+            --secondary-color: #ff0000;
+            --dark-bg: #101010;
+            --card-bg: #282828;
+            --text-color: #ffffff;
+            --text-secondary: #cccccc;
+            --ad-bg: rgba(0, 0, 0, 0.85);
+            --banner-ad-bg: linear-gradient(135deg, #1e0033, #4a0072);
+            --overlay-ad-bg: linear-gradient(to right, #c21500, #ffc500);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), #190736);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .player-section {
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            outline: none;
+        }
+
+        .video-info {
+            padding: 1rem;
+            background-color: #9a0475;
+            border-radius: 0 0 8px 8px;
+            border-color: #cccccc;
+            border: 5px;
+        }
+
+        .video-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .ad-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--ad-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            z-index: 10;
+            display: none;
+        }
+
+        .ad-container.show {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .ad-content {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .ad-brand {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .ad-timer {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .ad-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .ad-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .ad-button.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ad-button:hover {
+            background-color: #e60000;
+            transform: translateY(-2px);
+        }
+
+        .playlist-section {
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .playlist-item {
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            aspect-ratio: 16/9;
+        }
+
+        .playlist-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .playlist-item.active {
+            border: 3px solid var(--secondary-color);
+        }
+
+        .playlist-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .playlist-item .title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(233, 9, 166, 0.8), transparent);
+            color: rgb(247, 247, 247);
+            padding: 0.8rem 0.5rem;
+            font-size: 1.0rem;
+            text-align: left;
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            border: 5px;
+            border-color: #000;
+        }
+
+        .playlist-item .duration {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(3, 141, 10, 0.973);
+            color: white;
+            padding: 0.01rem 0.1rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        .load-more {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .load-more:hover {
+            background-color: #8a0368;
+            transform: translateY(-2px);
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .player-nav-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .player-nav-button:hover {
+            background-color: #8a0368;
+        }
+
+        .player-nav-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        footer {
+            background-color: #000;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .playlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .video-title {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .playlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .ad-content {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Nouveaux styles pour les différents formats publicitaires */
+        .ad-banner {
+            width: 100%;
+            padding: 1rem;
+            background: var(--banner-ad-bg);
+            color: white;
+            text-align: center;
+            margin: 1rem 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .ad-banner.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .ad-banner-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .ad-banner-text {
+            flex: 1;
+            min-width: 200px;
+            padding: 0 1rem;
+        }
+
+        .ad-banner-cta {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .ad-banner-cta:hover {
+            background-color: #e60000;
+            transform: translateY(-2px);
+        }
+
+        .ad-overlay {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: var(--overlay-ad-bg);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .ad-overlay.show {
+            display: block;
+        }
+
+        .ad-overlay-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .ad-overlay-content {
+            margin-top: 1rem;
+        }
+
+        .ad-overlay-cta {
+            display: inline-block;
+            background-color: white;
+            color: #c21500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<header>
+        <a href="#" class="logo">XFLIX</a>
+    </header>
+
+    <!-- Bannière publicitaire -->
+    <div class="ad-banner" id="bannerAd">
+        <div class="ad-banner-content">
+            <div class="ad-banner-text">
+                <h3>Offre spéciale limitée !</h3>
+                <p>Abonnez-vous maintenant et obtenez 30 jours gratuits</p>
+            </div>
+            <a href="https://example.com/offre-speciale" class="ad-banner-cta-link">
+                <button class="ad-banner-cta">Découvrir l'offre</button>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <section class="player-section">
+            <div class="video-container">
+                <video id="videoPlayer" controls poster="https://via.placeholder.com/800x450?text=MyCamTV+Player"></video>
+
+                <!-- Publicité preroll -->
+                <div class="ad-container" id="adContainer">
+                    <div class="ad-brand">Publicité</div>
+                    <div class="ad-content" id="adContent">Profitez de notre offre spéciale ce mois-ci !</div>
+                    <div class="ad-timer" id="adTimer">00:30</div>
+                    <div class="ad-buttons">
+                        <a href="https://play.google.com/store/apps/details?id=ma.tele" class="ad-button-link">
+                            <button class="ad-button" id="skipAdBtn">
+                                <i class="fas fa-forward"></i> Ignorer
+                            </button>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="video-info">
+                    <h2 class="video-title" id="currentVideoTitle">Sélectionnez une vidéo</h2>
+                    <div class="video-meta">
+                        <span id="videoPosition">0/14872</span>
+                        <span><i class="fas fa-eye"></i> 970.6M vues</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <button class="player-nav-button" id="prevButton" disabled>
+                    <i class="fas fa-backward"></i> Précédent
+                </button>
+                <button class="player-nav-button" id="nextButton">
+                    Suivant <i class="fas fa-forward"></i>
+                </button>
+            </div>
+        </section>
+
+        <section class="playlist-section">
+            <h2 class="section-title">XFLIX VOD</h2>
+            <div class="playlist-grid" id="playlist">
+                <!-- Vidéos chargées dynamiquement -->
+            </div>
+            <button class="load-more" id="loadMoreBtn">
+                <i class="fas fa-plus"></i> Afficher plus de vidéos
+            </button>
+        </section>
+         <section class="playlist-section">
+            <h2 class="section-title">XFLIX LIVE</h2>
+            <div class="playlist-grid" id="playlist">
+                <!-- Vidéos chargées dynamiquement -->
+            </div>
+            <button class="load-more" id="loadMoreBtn">
+                <i class="fas fa-plus"></i> Afficher plus de vidéos
+            </button>
+        </section>
+    </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2025 XFLIX. Tous droits réservés.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        // Configuration
+        const config = {
+            videosPerPage: 100,
+            adDuration: 15000, // 15 secondes pour les prerolls
+            skipAdDelay: 5000, // 5 secondes avant de pouvoir skipper
+            totalVideos: 14872,
+            baseVideoUrl: 'https://vod.mycamtv.net/',
+            thumbnailUrl: 'https://st4.depositphotos.com/10953878/29463/i/450/depositphotos_294630458-stock-photo-frozen-ice-letter-x-of.jpg',
+            defaultDuration: 'FREE',
+            midrollInterval: 180000, // 3 minutes en millisecondes
+            adChangeInterval: 30000 // Changer de pub toutes les 30s
+        };
+
+        // Catalogue de publicités
+        const ads = {
+            prerolls: [
+                {
+                    id: 1,
+                    title: "Sponsorisé par AFRICA BOX",
+                    content: "Suivez plus de 1500 chaines classiques en direct sur vote téléphone",
+                    duration: 15,
+                    brand: "Africa Box TV",
+                    cta: "Téléchargez Maintenant",
+                    image: "https://play-lh.googleusercontent.com/bUjzkXVO2dUBY2-MTDueNFqCkD3HvQfI1xACOxkQ4tIi-cMsYMOW0epuIdt_rEqnnz0=w526-h296-rw"
+                },
+                {
+                    id: 2,
+                    title: "Offre spéciale",
+                    content: "Économisez 30% sur tous les abonnements ce mois-ci",
+                    duration: 15,
+                    brand: "MyCamTV",
+                    cta: "S'abonner",
+                    image: "https://via.placeholder.com/800x450?text=Special+Offer"
+                },
+                {
+                    id: 3,
+                    title: "Nouveau produit",
+                    content: "Le nouveau modèle Pro 2023 est disponible maintenant",
+                    duration: 15,
+                    brand: "TechCorp",
+                    cta: "Découvrir",
+                    image: "https://via.placeholder.com/800x450?text=New+Product"
+                }
+            ],
+            midrolls: [
+                {
+                    id: 4,
+                    title: "Publicité midroll",
+                    content: "Cette vidéo vous est présentée par OurSponsor",
+                    duration: 10,
+                    brand: "OurSponsor",
+                    cta: "Visiter le site",
+                    image: "https://via.placeholder.com/800x450?text=Midroll+Ad"
+                },
+                {
+                    id: 5,
+                    title: "Interlude publicitaire",
+                    content: "Profitez de notre offre exclusive pour les viewers",
+                    duration: 10,
+                    brand: "PartnerCo",
+                    cta: "Voir l'offre",
+                    image: "https://via.placeholder.com/800x450?text=Sponsor+Message"
+                }
+            ],
+            banners: [
+                {
+                    id: 6,
+                    title: "Bannière publicitaire",
+                    content: "Abonnez-vous pour plus de contenu exclusif",
+                    cta: "S'abonner",
+                    bgColor: "#4a0072"
+                },
+                {
+                    id: 7,
+                    title: "Promotion",
+                    content: "Nouveaux contenus ajoutés chaque semaine",
+                    cta: "Explorer",
+                    bgColor: "#006064"
+                }
+            ],
+            overlays: [
+                {
+                    id: 8,
+                    title: "Nouveauté !",
+                    content: "Découvrez notre fonctionnalité premium",
+                    cta: "Essayer maintenant"
+                },
+                {
+                    id: 9,
+                    title: "Notification",
+                    content: "Activer les notifications pour ne rien manquer",
+                    cta: "Activer"
+                }
+            ]
+        };
+
+        // Éléments DOM
+        const elements = {
+            videoPlayer: document.getElementById('videoPlayer'),
+            playlist: document.getElementById('playlist'),
+            loadMoreBtn: document.getElementById('loadMoreBtn'),
+            adContainer: document.getElementById('adContainer'),
+            adContent: document.getElementById('adContent'),
+            adTimer: document.getElementById('adTimer'),
+            skipAdBtn: document.getElementById('skipAdBtn'),
+            currentVideoTitle: document.getElementById('currentVideoTitle'),
+            videoPosition: document.getElementById('videoPosition'),
+            prevButton: document.getElementById('prevButton'),
+            nextButton: document.getElementById('nextButton'),
+            bannerAd: document.getElementById('bannerAd'),
+            overlayAd: document.getElementById('overlayAd'),
+            closeOverlayAd: document.getElementById('closeOverlayAd')
+        };
+
+        // Variables d'état
+        let state = {
+            hls: null,
+            currentIndex: 0,
+            loadedVideos: 0,
+            currentVideoIndex: -1,
+            adInterval: null,
+            adTimeLeft: 0,
+            videoUrls: Array.from({ length: config.totalVideos }, (_, i) =>
+                `${config.baseVideoUrl}${i+1}.m3u8`),
+            currentAd: null,
+            midrollTimer: null,
+            lastMidrollTime: 0,
+            adDisplayTimes: {},
+            isPaused: false,
+            pauseAdTimer: null
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            loadVideos(0);
+            setupEventListeners();
+            showBannerAd();
+            setTimeout(showOverlayAd, 30000); // Afficher overlay après 30s
+        });
+
+        // Fonctions
+        function setupEventListeners() {
+            elements.loadMoreBtn.addEventListener('click', () => loadVideos(state.loadedVideos));
+            elements.skipAdBtn.addEventListener('click', skipAd);
+            elements.prevButton.addEventListener('click', playPreviousVideo);
+            elements.nextButton.addEventListener('click', playNextVideo);
+            elements.closeOverlayAd.addEventListener('click', hideOverlayAd);
+
+            elements.videoPlayer.addEventListener('play', () => {
+                state.isPaused = false;
+                startMidrollTimer();
+            });
+
+            elements.videoPlayer.addEventListener('pause', () => {
+                state.isPaused = true;
+            });
+
+            elements.videoPlayer.addEventListener('ended', () => {
+                if (state.currentVideoIndex < state.videoUrls.length - 1) {
+                    playNextVideo();
+                }
+            });
+
+            elements.videoPlayer.addEventListener('timeupdate', () => {
+            });
+        }
+
+        function getRandomAd(type) {
+            const adPool = ads[type];
+            return adPool[Math.floor(Math.random() * adPool.length)];
+        }
+
+        function showBannerAd() {
+            const bannerAd = getRandomAd('banners');
+            elements.bannerAd.querySelector('h3').textContent = bannerAd.title;
+            elements.bannerAd.querySelector('p').textContent = bannerAd.content;
+            elements.bannerAd.querySelector('.ad-banner-cta').textContent = bannerAd.cta;
+            elements.bannerAd.style.background = bannerAd.bgColor || "var(--banner-ad-bg)";
+            elements.bannerAd.classList.add('show');
+
+            setTimeout(() => {
+                elements.bannerAd.classList.remove('show');
+                setTimeout(showBannerAd, 120000); // Afficher à nouveau après 2 minutes
+            }, 15000);
+        }
+
+        function showOverlayAd() {
+            const overlayAd = getRandomAd('overlays');
+            elements.overlayAd.querySelector('h3').textContent = overlayAd.title;
+            elements.overlayAd.querySelector('p').textContent = overlayAd.content;
+            elements.overlayAd.querySelector('.ad-overlay-cta').textContent = overlayAd.cta;
+            elements.overlayAd.classList.add('show');
+
+            setTimeout(hideOverlayAd, 10000); // Disparaît après 10s
+        }
+
+        function hideOverlayAd() {
+            elements.overlayAd.classList.remove('show');
+            setTimeout(showOverlayAd, 180000); // Afficher à nouveau après 3 minutes
+        }
+
+        function showAd(type = 'preroll') {
+            // Choisir une publicité aléatoire du type demandé
+            state.currentAd = getRandomAd(type + 's');
+
+            // Configurer l'affichage
+            elements.adContent.textContent = state.currentAd.content;
+            elements.adContainer.querySelector('.ad-brand').textContent = state.currentAd.brand || "Publicité";
+            elements.skipAdBtn.textContent = `${state.currentAd.cta} (Attendez...)`;
+
+            // Configurer la durée
+            state.adTimeLeft = type === 'preroll' ? state.currentAd.duration : state.currentAd.duration;
+            elements.adTimer.textContent = formatTime(state.adTimeLeft);
+            elements.adContainer.classList.add('show');
+
+            // Délai avant de pouvoir skipper
+            setTimeout(() => {
+                elements.skipAdBtn.innerHTML = `<i class="fas fa-forward"></i> ${state.currentAd.cta}`;
+                elements.skipAdBtn.classList.add('active');
+            }, config.skipAdDelay);
+
+            // Compte à rebours
+            state.adInterval = setInterval(() => {
+                state.adTimeLeft--;
+                elements.adTimer.textContent = formatTime(state.adTimeLeft);
+
+                if (state.adTimeLeft <= 0) {
+                    clearInterval(state.adInterval);
+                    hideAd();
+                    if (type === 'preroll') {
+                        playVideoAfterAd();
+                    }
+                }
+            }, 1000);
+        }
+
+        function hideAd() {
+            elements.adContainer.classList.remove('show');
+            elements.skipAdBtn.classList.remove('active');
+            clearInterval(state.adInterval);
+        }
+
+        function skipAd() {
+            hideAd();
+            if (state.currentAd && state.currentAd.type === 'preroll') {
+                playVideoAfterAd();
+            }
+        }
+
+        function startMidrollTimer() {
+            // Nettoyer tout timer existant
+            if (state.midrollTimer) {
+                clearInterval(state.midrollTimer);
+            }
+
+            // Démarrer un nouveau timer
+            state.lastMidrollTime = 0;
+            state.midrollTimer = setInterval(() => {
+                const currentTime = elements.videoPlayer.currentTime;
+
+                // Vérifier si 3 minutes se sont écoulées depuis le dernier midroll
+                if (currentTime - state.lastMidrollTime >= config.midrollInterval / 1000) {
+                    if (!elements.videoPlayer.paused && currentTime > 30) { // Ne pas montrer dans les 30 premières secondes
+                        showMidrollAd();
+                        state.lastMidrollTime = currentTime;
+                    }
+                }
+            }, 10000); // Vérifier toutes les 10 secondes
+        }
+
+        function showMidrollAd() {
+            // Mettre en pause la vidéo
+            elements.videoPlayer.pause();
+
+            // Afficher la publicité midroll
+            showAd('midroll');
+        }
+
+        function playVideoAfterAd() {
+            if (state.currentVideoIndex >= 0) {
+                const videoUrl = state.videoUrls[state.currentVideoIndex];
+                initHlsPlayer(videoUrl);
+
+                elements.videoPlayer.play().catch(e => {
+                    console.error("Erreur de lecture:", e);
+                    // Si la lecture automatique échoue, permettre à l'utilisateur de démarrer manuellement
+                    elements.videoPlayer.controls = true;
+                });
+
+                // Redémarrer le timer pour les midrolls
+                startMidrollTimer();
+            }
+        }
+
+     function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function loadVideos(startIndex) {
+            const endIndex = Math.min(startIndex + config.videosPerPage, state.videoUrls.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                createVideoItem(i);
+            }
+
+            state.loadedVideos = endIndex;
+            updateLoadMoreButton();
+        }
+
+        function createVideoItem(index) {
+            const videoItem = document.createElement('div');
+            videoItem.className = 'playlist-item';
+            videoItem.dataset.index = index;
+
+            if (index === state.currentVideoIndex) {
+                videoItem.classList.add('active');
+            }
+
+            const img = document.createElement('img');
+            img.src = config.thumbnailUrl;
+            img.alt = `Vignette vidéo ${index + 1}`;
+            img.loading = 'lazy';
+
+            const title = document.createElement('div');
+            title.className = 'title';
+            title.textContent = `Vidéo ${index + 1}`;
+
+            const duration = document.createElement('div');
+            duration.className = 'duration';
+            duration.textContent = config.defaultDuration;
+
+            videoItem.appendChild(img);
+            videoItem.appendChild(title);
+            videoItem.appendChild(duration);
+
+            videoItem.addEventListener('click', () => playVideo(index));
+            elements.playlist.appendChild(videoItem);
+        }
+
+        function updateLoadMoreButton() {
+            if (state.loadedVideos >= state.videoUrls.length) {
+                elements.loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        function playVideo(index) {
+            // Mettre à jour l'état
+            state.currentVideoIndex = index;
+
+            // Mettre à jour l'interface
+            updateActiveVideoStyle();
+            updateVideoInfo();
+            updateNavButtons();
+
+            // Afficher la publicité avant de jouer la vidéo
+            showAd('preroll');
+        }
+
+        function initHlsPlayer(videoUrl) {
+            if (Hls.isSupported()) {
+                if (state.hls) {
+                    state.hls.destroy();
+                }
+
+                state.hls = new Hls();
+                state.hls.loadSource(videoUrl);
+                state.hls.attachMedia(elements.videoPlayer);
+
+                state.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log("Manifest chargé, prêt à jouer");
+                });
+
+                state.hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error("HLS Error:", data);
+                    if (data.fatal) {
+                        handlePlayerError();
+                    }
+                });
+            } else if (elements.videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                elements.videoPlayer.src = videoUrl;
+            }
+        }
+
+        function updateActiveVideoStyle() {
+            document.querySelectorAll('.playlist-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === state.currentVideoIndex);
+            });
+        }
+
+        function updateVideoInfo() {
+            elements.currentVideoTitle.textContent = `Vidéo ${state.currentVideoIndex + 1}`;
+            elements.videoPosition.textContent = `${state.currentVideoIndex + 1}/${state.videoUrls.length}`;
+        }
+
+        function updateNavButtons() {
+            elements.prevButton.disabled = state.currentVideoIndex <= 0;
+            elements.nextButton.disabled = state.currentVideoIndex >= state.videoUrls.length - 1;
+        }
+
+        function playNextVideo() {
+            if (state.currentVideoIndex < state.videoUrls.length - 1) {
+                playVideo(state.currentVideoIndex + 1);
+            }
+        }
+
+        function playPreviousVideo() {
+            if (state.currentVideoIndex > 0) {
+                playVideo(state.currentVideoIndex - 1);
+            }
+        }
+
+        function handlePlayerError() {
+            alert("Une erreur est survenue lors du chargement de la vidéo. Veuillez réessayer.");
+            if (state.hls) {
+                state.hls.destroy();
+            }
+        }
+
+        function playVideo(index) {
+            // Mettre à jour l'état
+            state.currentVideoIndex = index;
+
+            // Mettre à jour l'interface
+            updateActiveVideoStyle();
+            updateVideoInfo();
+            updateNavButtons();
+
+            // Afficher la publicité preroll avant de jouer la vidéo
+            showAd('preroll');
+        }
+
+         if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker enregistré avec succès:', registration.scope);
+                }).catch(error => {
+                    console.log('Échec de l\'enregistrement du ServiceWorker:', error);
+                });
+            });
+        }
+
+        // Gestion de l'installation de l'application
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            const installButton = document.createElement('button');
+            installButton.textContent = 'Installer XFLIX';
+            installButton.style.position = 'fixed';
+            installButton.style.bottom = '20px';
+            installButton.style.right = '20px';
+            installButton.style.zIndex = '1000';
+            installButton.style.padding = '10px 20px';
+            installButton.style.backgroundColor = 'var(--primary-color)';
+            installButton.style.color = 'white';
+            installButton.style.border = 'none';
+            installButton.style.borderRadius = '5px';
+            installButton.style.cursor = 'pointer';
+            installButton.id = 'installButton';
+
+            document.body.appendChild(installButton);
+
+            installButton.addEventListener('click', () => {
+                deferredPrompt.prompt();
+                installButton.style.display = 'none';
+
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('L\'utilisateur a accepté l\'installation');
+                    } else {
+                        console.log('L\'utilisateur a refusé l\'installation');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
