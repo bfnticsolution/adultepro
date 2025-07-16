@@ -4,37 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XFLIX - Hors ligne</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #9a0475;
+            --secondary-color: #6a0255;
+            --bg-color: #101010;
+            --text-color: #ffffff;
+            --error-color: #ff4d4d;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #101010;
-            color: white;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             text-align: center;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(154, 4, 117, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(106, 2, 85, 0.15) 0%, transparent 50%);
         }
+        
         .container {
             padding: 2rem;
             max-width: 600px;
+            animation: fadeIn 0.5s ease-out;
         }
+        
+        .offline-card {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         h1 {
-            color: #9a0475;
-        }
-        .icon {
-            font-size: 3rem;
+            color: var(--primary-color);
+            font-size: 2.2rem;
             margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--error-color);
+            animation: pulse 2s infinite;
+        }
+        
+        p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(154, 4, 117, 0.3);
+        }
+        
+        .connection-status {
+            margin-top: 2rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 1rem;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">⚠️</div>
-        <h1>Vous êtes hors ligne</h1>
-        <p>XFLIX nécessite une connexion Internet pour fonctionner.</p>
-        <p>Veuillez vérifier votre connexion et réessayer.</p>
+        <div class="offline-card">
+            <div class="icon">
+                <i class="fas fa-wifi-slash"></i>
+            </div>
+            <h1>Connexion perdue</h1>
+            <p>XFLIX nécessite une connexion Internet pour accéder au contenu.</p>
+            <p>Veuillez vérifier votre connexion réseau et réessayer.</p>
+            
+            <div class="connection-status" id="connectionStatus">
+                <i class="fas fa-sync-alt fa-spin"></i> Vérification de la connexion...
+            </div>
+            
+            <button class="btn" id="retryBtn">
+                <i class="fas fa-sync-alt"></i> Réessayer
+            </button>
+        </div>
     </div>
+    
+    <div class="footer">
+        XFLIX &copy; 2023 | <span id="currentYear"></span>
+    </div>
+
+    <script>
+        // Mise à jour de l'année en cours
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Vérification périodique de la connexion
+        const retryBtn = document.getElementById('retryBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        function checkConnection() {
+            connectionStatus.style.display = 'block';
+            retryBtn.disabled = true;
+            
+            fetch('https://httpbin.org/get', { 
+                method: 'HEAD',
+                cache: 'no-store',
+                mode: 'no-cors'
+            })
+            .then(() => {
+                // Connexion rétablie
+                connectionStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connexion rétablie ! Redirection...';
+                setTimeout(() => window.location.reload(), 1500);
+            })
+            .catch(() => {
+                // Toujours hors ligne
+                connectionStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Toujours hors ligne';
+                retryBtn.disabled = false;
+                setTimeout(() => connectionStatus.style.display = 'none', 3000);
+            });
+        }
+        
+        retryBtn.addEventListener('click', checkConnection);
+        
+        // Vérifier automatiquement toutes les 15 secondes
+        setInterval(checkConnection, 15000);
+        
+        // Détection en temps réel de la reconnexion
+        window.addEventListener('online', () => {
+            connectionStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connexion détectée ! Redirection...';
+            setTimeout(() => window.location.reload(), 1000);
+        });
+    </script>
 </body>
 </html>
