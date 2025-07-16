@@ -1,26 +1,112 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" prefix="og: https://ogp.me/ns#">
 <head>
+    <!-- Métadonnées de base -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lecteur vidéo professionnel avec playlist et gestion de publicités">
-    <title>XFLIX - L'univers du divertissement pour adulte</title>
-
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/manifest.json">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>XFLIX - Plateforme de streaming premium pour adultes</title>
+    <meta name="description" content="Regardez des milliers de vidéos premium en streaming avec XFLIX. Accès illimité à notre catalogue exclusif sur tous vos appareils.">
+    
+    <!-- Balises canoniques -->
+    <link rel="canonical" href="https://xflix.matele.live">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://xflix.matele.live">
+    <meta property="og:title" content="XFLIX - Streaming vidéo premium pour adultes">
+    <meta property="og:description" content="Catalogue exclusif de vidéos en streaming HD. Compatible mobile, tablette et TV.">
+    <meta property="og:image" content="https://xflix.matele.live/images/social-preview.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="XFLIX">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@XFLIX">
+    <meta name="twitter:creator" content="@XFLIX">
+    <meta name="twitter:title" content="XFLIX - Streaming vidéo premium">
+    <meta name="twitter:description" content="Accès illimité à notre catalogue exclusif sur tous vos appareils.">
+    <meta name="twitter:image" content="https://xflix.matele.live/images/social-preview.jpg">
+    <meta name="twitter:image:alt" content="XFLIX - Interface de streaming">
+    
+    <!-- Apple/Safari -->
+    <meta name="apple-mobile-web-app-title" content="XFLIX">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="XFLIX">
-    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-    <meta name="theme-color" content="#9a0475" />
-    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#9a0475">
+    
+    <!-- Microsoft -->
     <meta name="msapplication-TileColor" content="#9a0475">
-
+    <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#9a0475">
+    <meta name="application-name" content="XFLIX">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="shortcut icon" href="/icons/favicon.ico">
+    
+    <!-- Préchargement des ressources -->
+    <link rel="preload" href="https://vjs.zencdn.net/7.15.4/video-js.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="/styles/main.css" as="style">
+    <link rel="preload" href="https://vjs.zencdn.net/7.15.4/video.min.js" as="script">
+    
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "XFLIX",
+      "url": "https://xflix.matele.live",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://xflix.matele.live/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <style>
+        .video-js {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            background-color: #000;
+        }
+        .vjs-poster {
+            background-size: cover;
+        }
+        
+        /* Prévisualisation pour les réseaux sociaux */
+        .social-preview {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-<header>
+    <!-- Prévisualisation pour le partage social (cachée mais accessible aux robots) -->
+    <div class="social-preview">
+        <h1>XFLIX - Streaming Premium</h1>
+        <p>Accédez à notre catalogue exclusif de vidéos pour adultes en qualité HD</p>
+        <img src="/images/social-preview.jpg" alt="Aperçu XFLIX">
+        <p>Disponible sur mobile, tablette et ordinateur</p>
+    </div>
+
+    <header>
         <a href="https://matele.live" class="logo">XFLIX</a>
     </header>
 
@@ -31,7 +117,7 @@
                 <h3>TOUT CANAL+ !</h3>
                 <p>Téléchargez maintenant Africa Box pour visionner toutes les chaînes du monde</p>
             </div>
-            <a href="https://matele.live" class="ad-banner-cta-link">
+            <a href="https://matele.live" class="ad-banner-cta-link" rel="noopener noreferrer">
                 <button class="ad-banner-cta">Découvrir</button>
             </a>
         </div>
@@ -40,7 +126,14 @@
     <div class="main-container">
         <section class="player-section">
             <div class="video-container">
-                <video id="videoPlayer" controls poster="player-cover.jpg"></video>
+                <video id="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered" 
+                       controls preload="auto" poster="/images/player-cover.jpg" 
+                       data-setup='{"techOrder": ["html5"], "autoplay": false}'>
+                    <p class="vjs-no-js">
+                        Pour voir cette vidéo, veuillez activer JavaScript ou envisagez de passer à un navigateur qui
+                        <a href="https://videojs.com/html5-video-support/" target="_blank" rel="noopener">supporte HTML5 video</a>
+                    </p>
+                </video>
 
                 <!-- Publicité preroll -->
                 <div class="ad-container" id="adContainer">
@@ -48,7 +141,7 @@
                     <div class="ad-content" id="adContent">Profitez de notre offre spéciale ce mois-ci !</div>
                     <div class="ad-timer" id="adTimer">00:30</div>
                     <div class="ad-buttons">
-                        <a href="https://matele.live" class="ad-button-link">
+                        <a href="https://matele.live" class="ad-button-link" rel="noopener noreferrer">
                             <button class="ad-button" id="skipAdBtn">
                                 <i class="fas fa-forward"></i> Ignorer
                             </button>
@@ -84,24 +177,52 @@
                 <i class="fas fa-plus"></i> Afficher plus de vidéos
             </button>
         </section>
-         <section class="playlist-section">
+        
+        <section class="playlist-section">
             <h2 class="section-title">XFLIX LIVE</h2>
-            <div class="playlist-grid" id="playlist">
-                <!-- Vidéos chargées dynamiquement -->
+            <div class="playlist-grid" id="liveChannels">
+                <!-- Chaînes live chargées dynamiquement -->
             </div>
-            <button class="load-more" id="loadMoreBtn">
+            <button class="load-more" id="loadMoreLiveBtn">
                 <i class="fas fa-plus"></i> Afficher plus de chaînes
             </button>
         </section>
     </div>
 
-    </div>
-
     <footer>
-        <p>&copy; 2025 <a href="https://matele.live">AFRICA BOX</a>. Tous droits réservés.</p>
+        <p>&copy; 2025 <a href="https://matele.live" rel="noopener noreferrer">AFRICA BOX</a>. Tous droits réservés.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="scripts/main.js"> </script>
+    <!-- Scripts -->
+    <script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>
+    <script src="/scripts/main.js"></script>
+    
+    <!-- Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    
+    <!-- Facebook Pixel -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', 'XXXXXXXXXXXXXXX');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" 
+             src="https://www.facebook.com/tr?id=XXXXXXXXXXXXXXX&ev=PageView&noscript=1"/>
+    </noscript>
 </body>
 </html>
